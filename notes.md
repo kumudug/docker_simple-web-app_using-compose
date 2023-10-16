@@ -15,3 +15,7 @@
 * Backend
    - After dockerizing the mongodb ran the backend by running command `node app.js`
    - Got the output `CONNECTED TO MONGODB` confiming that the backend worked locally with dockerized mongo db
+
+### Dockerizing the backend
+
+* Initial docker file created
