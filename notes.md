@@ -48,3 +48,8 @@
    - `docker run --name compose-backend --rm -d --network network-compose node_backend_compose:initial`
    - Looking at the logs using `docker logs compose-backend` showed `CONNECTED TO MONGODB`
 
+### What if we didn't use a network
+
+* We can run this without an explicit network as well
+   - In that case the url change will need to be `host.docker.internal` instead of the control name
+
