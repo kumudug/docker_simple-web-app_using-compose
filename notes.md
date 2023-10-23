@@ -48,4 +48,17 @@
    - `docker run --name compose-backend --rm -d --network network-compose node_backend_compose:initial`
    - Looking at the logs using `docker logs compose-backend` showed `CONNECTED TO MONGODB`
 
+### Dockerizing the frond end app
 
+* Now we need to dockerize the front end app
+   - It's based on the react starter kit so running on npm and express
+   - Should run in the same network
+   - Should expose the port 3000 which is the default for react startr kit express settings
+   - The front end will access the backend but within the same network so thats why we didn't expose any ports in the backend docker container
+   - Change the api urls to reflect the image
+      - Change the api code in the front end to reference the container by name instead of localhost
+      - Ex: `http://localhost/goals/` needs to be `http://compose-backend/goals/`
+   - Build the image
+      - `docker build -t node_front_compose:initial .`
+   - Run a container based on that image
+      - `docker run --name compose-front --rm -d --network network-compose -p 3000:3000 node_front_compose:initial`
