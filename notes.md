@@ -62,3 +62,23 @@
       - `docker build -t node_front_compose:initial .`
    - Run a container based on that image
       - `docker run --name compose-front --rm -d --network network-compose -p 3000:3000 node_front_compose:initial`
+
+### Why doesn't the frontend work after dockerizing
+
+* The frontned app uses node and express to run the app
+   - I used a docker network to start it and changed all the backend calling get, post api calls to reflect a change in api address by using teh network like `http://localhost/goals/` needs to be `http://compose-backend/goals/`
+   - The froend end is a react app that runs on the browser
+   - That means its not actually running in the container and when the javascript tries to call the backend api its already running outside of the container and in the browser
+   - Only the node server thats serving the html and javascript are runnin in the container
+   - Thus javascript doesn't understand the backend api url that is using the network name
+   - So the frontend actually doesn't use the network at all so doesn't even need to be on the same network
+* In order to fix this issue
+   - The backend api needs to espose the port and make the backend accessible from the localhost machine
+      - Lets run the backend again using the same image (image already have the port export. We just didn't expose it to localhost when running the container last time)
+      - `docker run --name compose-backend --rm -d --network network-compose -p 8080:80 node_backend_compose:initial`
+   - Frontend needs to call the backend api using the exposed port 
+      - Change all the api code to look like `http://localhost:8080/goals/`
+   - Build the image
+      - `docker build -t node_front_compose:initial .`
+   - Run a container based on that image. We don't need it to be in the network though we do it to contain everything together
+      - `docker run --name compose-front --rm -d --network network-compose -p 3000:3000 node_front_compose:initial`
