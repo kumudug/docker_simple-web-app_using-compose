@@ -82,3 +82,23 @@
       - `docker build -t node_front_compose:initial .`
    - Run a container based on that image. We don't need it to be in the network though we do it to contain everything together
       - `docker run --name compose-front --rm -d --network network-compose -p 3000:3000 node_front_compose:initial`
+
+## MongoDB - Storage and Security
+
+* Now that we have the application working we can focus on improvements. 
+
+### MongoDB presistance on container destruction
+
+* Mongodb is a document database
+* The data is currently stored inside of the running container based on the image
+* We are using the official image [docker-hub-mongo](https://hub.docker.com/_/mongo)
+* We have to either keep using the same container in order to presist the data between contaienr restarts
+* If we use `--rm` flag that means data is lost once th econtainer exists
+* The official documentation specifies that the data is stored in the container at path `/data/db`
+* So that means we can use a volume to presist the data 
+* Official documentation also specified that mac os file system is not compatible with the memory mapped filed used by mongodb
+* Meaning we cannot use a bind mount cause in a bind mount we are mapping a host folder to a container
+* Instead we can get docker to manage the volue by using a named volume. (Well an anonymous volme doesn't achieve the requirement of reusability of data across containers)
+* So lets stop the running container and start it with a named volume
+   - `docker stop mongoctr`
+   - `docker run --name mongoctr --rm -d --network network-compose -v db-volume:/data/db mongo:latest`
