@@ -102,3 +102,26 @@
 * So lets stop the running container and start it with a named volume
    - `docker stop mongoctr`
    - `docker run --name mongoctr --rm -d --network network-compose -v db-volume:/data/db mongo:latest`
+
+### Securing the MondoDB using authentication
+
+* Currently we do not use any auth for the mongodb db
+* The official image supports setting a username and a passsword when initializing the database
+* Ideally we should not store the plaintext username and password 
+   - Docker has a concept of docker secrets in swarm mode
+   - Or there are other services we can use
+   - For now lets go with plaintext to test
+* Mongo does support role based authentication and have docs provided on the official image. However lets try something simple first
+* Mongodb official image supports setting the username and password using environment variables at initalization
+   - Stop the running container
+   - `docker stop mongoctr`
+   - IMPORTANT: Delete the datavolume as it has the old database with the default password
+   - `docker volume remove db-volume`
+   - Initialize a new container and override the default username password by overriding the environment variables
+   - `docker run --name mongoctr --rm -d --network network-compose -v db-volume:/data/db -e MONGO_INITDB_ROOT_USERNAME=devuser -e MONGO_INITDB_ROOT_PASSWORD=pwd mongo:latest`
+   - Now change the connection string of the backend to send the user and password in plain text query string for the time being
+   - `mongodb://devuser:pwd@mongoctr:27017/course-goals?authSource=admin`
+   - Stop the container, rebuild the image and run a new container for the backend
+   - `docker stop compose-backend`
+   - `docker build -t node_backend_compose:initial .`
+   - `docker run --name compose-backend --rm -d --network network-compose -p 8080:80 node_backend_compose:initial`
