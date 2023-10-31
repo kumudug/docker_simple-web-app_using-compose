@@ -125,3 +125,20 @@
    - `docker stop compose-backend`
    - `docker build -t node_backend_compose:initial .`
    - `docker run --name compose-backend --rm -d --network network-compose -p 8080:80 node_backend_compose:initial`
+
+## Fine tuning for development and prod
+
+### Backend app set port using arguments and environment variables
+
+* Currently the port is hard coded
+* Use an ENV variable and a ARG combo
+   - ARG is used to set it and this can be overriden in build time (ex: debug and production builds can have different values thus we can override and build different images for debug and prod)
+   - ENV variable is set using the argument inside the docker file. ENV variable can be used by the server.js file (inside code) thus its important to use that. ENV variables can also be overriden during runtime so we can override the images ARG when starting a container using that image if needed.
+* Then
+   - Stop the container `docker stop compose-backend`
+   - Rebuild the image and thistime specify the ARG (to test give this as 8080 for the image so when running we can override to 81 in container)
+      - `docker build --build-arg DEFAULT_PORT=8080 -t node_backend_compose:initial .`
+   - Run a container with that image
+      - `docker run --name compose-backend -e PORT=81 --rm -d --network network-compose -p 8080:81 node_backend_compose:initial`
+
+### Backend app volumes and auto refresh with code changes

@@ -92,7 +92,7 @@ mongoose.connect(
   .then(
     () => {
       console.log('CONNECTED TO MONGODB');
-      app.listen(80);
+      app.listen(process.env.PORT);
     }
   )
   .catch((err) => {
