@@ -138,7 +138,51 @@
    - Stop the container `docker stop compose-backend`
    - Rebuild the image and thistime specify the ARG (to test give this as 8080 for the image so when running we can override to 81 in container)
       - `docker build --build-arg DEFAULT_PORT=8080 -t node_backend_compose:initial .`
-   - Run a container with that image
+   - Run a container with that image. Here we are overriding the ARG 8080 into 81 using ENV variables and exposing 81 to hosts 8080
       - `docker run --name compose-backend -e PORT=81 --rm -d --network network-compose -p 8080:81 node_backend_compose:initial`
 
 ### Backend app volumes and auto refresh with code changes
+
+* We are trying to get a development image build where it referes to the code by a named volume and restarts the node server when code changes. We can do this using nodemon
+* We do not want node_modules folder installed in the local machine
+* The backend app uses `morgan` to log request info and they are stored in `logs` folder in the root
+* In order to get the source code references from the local folder to the container we can use a bind mount
+* We don't want the container to write back to the source code folder so we are gonna use the `ro` option
+   - `docker run --name compose-backend -e PORT=81 --rm -d --network network-compose -v $(pwd):/app:ro -p 8080:81 node_backend_compose:initial`
+* In the docker file we first copy `package.json`, install node modules and then copy source
+      ```
+      COPY package.json .
+
+      RUN npm install
+
+      COPY . .
+      ```
+   - Docker uses a layerd build system
+   - This way when we haven't changed `package.json` but have changed code docker doesn't run npm install during image rebuild
+   - Thats why we copy the remaining items after npm install
+* In the prevous step we used a bind mount to map the local `app` folder to the containers `app` folder. This will basically override the `node_modules` folder if present or create the folder in the source code folders. Or if we specify the `ro` flag it will prevent this from working. To prevent that we can add an anonymous volume for node modules. Since longer paths always takes precidence this will override the bind mount for `app` folder as our node modules reference is `app/node_modules`. 
+   - We don't need a named volume as we are not interested in reusing the npm install results across all contaienr restarts
+      - `docker run --name compose-backend -e PORT=81 --rm -d --network network-compose -v $(pwd):/app:ro -v /app/node_modules -p 8080:81 node_backend_compose:initial`
+* For the logs the backend app uses we can use a named volume. So we can reuse the volume across container restarts. If we use an anonymous volume we can't get the logs from the last run container. 
+   - Also longer internal container parths takes precidence. So if we define a new volume for `/app/logs` folder it will override the previouly defined bind mount which is referencing the `/app` folder
+   - `docker run --name compose-backend -e PORT=81 --rm -d --network network-compose -v $(pwd):/app:ro  -v /app/node_modules -v logs:/app/logs -p 8080:81 node_backend_compose:initial`
+   - its important to make sure you run this in the root of the backend project
+* Now we need to make use of Nodemon to auto refresh code
+   - `npm install --save-dev nodemon`
+   - Add a start script to package.json file 
+      ```
+        "scripts": {
+         "start":"nodemon app.js"
+      },
+      ```
+   - Change dockerfile to use the package.json files start script
+      `CMD [ "npm", "start" ]`
+   - Stop the running backend container
+      - `docker stop compose-backend`
+   - Rebuild the backend project
+      - `docker build --build-arg DEFAULT_PORT=8080 -t node_backend_compose:initial .`
+   - Run the backend project again
+      - `docker run --name compose-backend -e PORT=81 --rm -d --network network-compose -v $(pwd):/app:ro  -v /app/node_modules -v logs:/app/logs -p 8080:81 node_backend_compose:initial`
+      - Tested the auto code changes by chaning the backend a bit. Worked
+
+
