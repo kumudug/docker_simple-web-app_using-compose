@@ -19,4 +19,4 @@ ENV PORT $DEFAULT_PORT
 
 EXPOSE $PORT
 
-CMD [ "node", "app.js" ]
+CMD [ "npm", "start" ]
