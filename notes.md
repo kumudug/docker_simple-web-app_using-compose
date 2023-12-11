@@ -120,11 +120,12 @@
    - Initialize a new container and override the default username password by overriding the environment variables
    - `docker run --name mongoctr --rm -d --network network-compose -v db-volume:/data/db -e MONGO_INITDB_ROOT_USERNAME=devuser -e MONGO_INITDB_ROOT_PASSWORD=pwd mongo:latest`
    - Now change the connection string of the backend to send the user and password in plain text query string for the time being
-   - `mongodb://devuser:pwd@mongoctr:27017/course-goals?authSource=admin`
+   - `mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@mongoctr:27017/course-goals?authSource=admin`
+   - Change the backend docker file with the new ENV variable and arguments (See dockerfile)
    - Stop the container, rebuild the image and run a new container for the backend
    - `docker stop compose-backend`
    - `docker build -t node_backend_compose:initial .`
-   - `docker run --name compose-backend --rm -d --network network-compose -p 8080:80 node_backend_compose:initial`
+   - `docker run --name compose-backend --rm -d --network network-compose -p 8080:80 -e MONGODB_USERNAME='devuser' -e MONGODB_PASSWORD='pwd' node_backend_compose:initial`
 
 ## Fine tuning for development and prod
 
