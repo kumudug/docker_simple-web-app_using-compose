@@ -187,3 +187,12 @@
       - Tested the auto code changes by chaning the backend a bit. Worked
 
 
+### Docker ignore file
+
+* In order to prevent unwanted files being copied during `COPY . .` we can use a `.dockerignore` file
+* Example content
+   ```
+   node_modules
+   Dockerfile
+   .git
+   ```
