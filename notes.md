@@ -196,3 +196,18 @@
    Dockerfile
    .git
    ```
+
+### Front end app auto refresh with code changes
+
+* We don't need to use nodemon as the front end app uses react startup template which already has the auto refresh
+* We just need to add a bind mount
+* Stop the running container first
+   - `docker stop compose-front`
+* Now we need to add a bind mount to the source folder which is the `.\src`
+* Make sure to run this command in the front end folder as we are using the `$(pwd)`
+* Build the image again as we added the `.dockerignore` file. This will prevent `node_modules` from being copied
+* Build the image
+      - `docker build -t node_front_compose:initial .`
+* Run with a read only bind mount to the source
+   - `docker run --name compose-front --rm -d --network network-compose -v $(pwd)/src:/app/src:ro -p 3000:3000 node_front_compose:initial`
+* Tested by changing some html in the front end app
