@@ -68,7 +68,7 @@
 * The frontned app uses node and express to run the app
    - I used a docker network to start it and changed all the backend calling get, post api calls to reflect a change in api address by using teh network like `http://localhost/goals/` needs to be `http://compose-backend/goals/`
    - The froend end is a react app that runs on the browser
-   - That means its not actually running in the container and when the javascript tries to call the backend api its already running outside of the container and in the browser
+   - That means its not actually running in the container, thus when the javascript tries to call the backend api its already running outside of the container and in the browser
    - Only the node server thats serving the html and javascript are runnin in the container
    - Thus javascript doesn't understand the backend api url that is using the network name
    - So the frontend actually doesn't use the network at all so doesn't even need to be on the same network
@@ -211,3 +211,7 @@
 * Run with a read only bind mount to the source
    - `docker run --name compose-front --rm -d --network network-compose -v $(pwd)/src:/app/src:ro -p 3000:3000 node_front_compose:initial`
 * Tested by changing some html in the front end app
+
+## Using docker compose
+
+* Now that we have all the images build and containers running successfully we can start using docker compose instead of running all 3 containers in the command line

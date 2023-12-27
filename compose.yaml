@@ -1,0 +1,22 @@
+services:
+  # Last command before compose: docker run --name mongoctr --rm -d --network network-compose -v db-volume:/data/db -e MONGO_INITDB_ROOT_USERNAME=devuser -e MONGO_INITDB_ROOT_PASSWORD=pwd mongo:latest
+  mongodb:
+    image: 'mongo:latest'
+    volumes:
+      - db-volume:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=devuser
+      #- MONGO_INITDB_ROOT_PASSWORD=pwd
+      # Below syntax works as well
+      # MONGO_INITDB_ROOT_USERNAME:devuser
+      # MONGO_INITDB_ROOT_PASSWORD:pwd
+    env_file:
+      - ./env/mongo.env
+    # networks: compose creates a default network for all containers within the compose file. If needed we can use our own network as well
+      
+  # backend:
+  # frontend:
+
+volumes:
+   db-volume:
+
