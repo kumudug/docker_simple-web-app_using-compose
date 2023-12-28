@@ -1,7 +1,7 @@
 services:
   # Last command before compose: docker run --name mongoctr --rm -d --network network-compose -v db-volume:/data/db -e MONGO_INITDB_ROOT_USERNAME=devuser -e MONGO_INITDB_ROOT_PASSWORD=pwd mongo:latest
   mongodb:
-    image: 'mongo:latest'
+    image: 'mongo:latest' # We specify the image as we are not building the image ourselves. Instead we are using the official mongo image. 
     volumes:
       - db-volume:/data/db
     environment:
@@ -13,10 +13,30 @@ services:
     env_file:
       - ./env/mongo.env
     # networks: compose creates a default network for all containers within the compose file. If needed we can use our own network as well
-      
-  # backend:
+
+  # Last command before compose: `docker run --name compose-backend -e PORT=81 --rm -d --network network-compose -v $(pwd):/app:ro  -v /app/node_modules -v logs:/app/logs -p 8080:81 node_backend_compose:initial`    
+  backend:
+    # image: node_backend_compose:initial - This is an image we build. Thus instead of specying the image we should tell compose how to build this so compose can take care of that
+    # Last command used to build `docker build --build-arg DEFAULT_PORT=8080 -t node_backend_compose:initial .`
+    build: 
+      context: ./backend
+      args:
+        - DEFAULT_PORT=8080
+    ports:
+        - '8080:81' # Host port is 8080 and container port is 81
+    volumes:
+      - logs:/app/logs
+      - ./backend:/app:ro # bind mounts can be referenced by relative path. Path relative to the compose.yaml. Thus $(pwd):/app:ro becomes this
+      - /app/node_modules
+    environment:
+      - PORT=81
+    env_file:
+      - ./env/backend.env
+    depends_on:
+      - mongodb
   # frontend:
 
 volumes:
    db-volume:
+   logs:
 

@@ -215,3 +215,7 @@
 ## Using docker compose
 
 * Now that we have all the images build and containers running successfully we can start using docker compose instead of running all 3 containers in the command line
+* `compose.yaml` file contains the compose config. Also contains comments to explain the config
+* Start - `docker-compose up -d` - Start all containers in `compose.yaml` file in detached mode
+* Stop - `docker-compose down`
+
