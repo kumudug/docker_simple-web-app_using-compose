@@ -1,6 +1,6 @@
 services:
   # Last command before compose: docker run --name mongoctr --rm -d --network network-compose -v db-volume:/data/db -e MONGO_INITDB_ROOT_USERNAME=devuser -e MONGO_INITDB_ROOT_PASSWORD=pwd mongo:latest
-  mongodb:
+  mongoctr:
     image: 'mongo:latest' # We specify the image as we are not building the image ourselves. Instead we are using the official mongo image. 
     volumes:
       - db-volume:/data/db
@@ -33,8 +33,17 @@ services:
     env_file:
       - ./env/backend.env
     depends_on:
-      - mongodb
-  # frontend:
+      - mongoctr
+  frontend:
+    # Last build command `docker build -t node_front_compose:initial .`
+    # Last run command `docker run --name compose-front --rm -d --network network-compose -v $(pwd)/src:/app/src:ro -p 3000:3000 node_front_compose:initial`
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend/src:/app/src:ro
+    depends_on:
+      - backend
 
 volumes:
    db-volume:

@@ -218,4 +218,5 @@
 * `compose.yaml` file contains the compose config. Also contains comments to explain the config
 * Start - `docker-compose up -d` - Start all containers in `compose.yaml` file in detached mode
 * Stop - `docker-compose down`
+* Build - `docker-compose build`
 
